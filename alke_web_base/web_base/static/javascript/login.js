@@ -1,24 +1,12 @@
 $(document).ready(function() {
-    const emailCorrecto = "correo@correo.com";
-    const passwordCorrecta = '12345';
+    // Cuando el usuario haga clic en iniciar sesión...
+    $('#login').submit(function() {
+        // IMPORTANTE: Ya NO usamos event.preventDefault();
+        // Esto permite que el formulario viaje a Python (views.py)
 
-    $('#login').submit(function(event) {
-        event.preventDefault();
-        let datoEmail = $('#email').val();
-        let datoPassword = $('#password').val();
-
-        if (datoEmail === emailCorrecto && datoPassword === passwordCorrecta) {
-            $('#login').fadeOut(300, function() {
-                $('#loader').fadeIn(300);
-
-                setTimeout(function() {
-                    $('body').fadeOut(500, function() {
-                        window.location.assign("menu.html");
-                    });
-                }, 1500); 
-            });
-        } else {
-            alert('Datos incorrectos');
-        }
+        // Mantenemos solo la parte visual (el loader)
+        $('#login').fadeOut(300, function() {
+            $('#loader').fadeIn(300);
+        });
     });
 });
