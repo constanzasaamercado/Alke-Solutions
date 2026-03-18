@@ -1,36 +1,78 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Alke Wallet{% endblock %}</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
+<div id="app-wrapper">
 
-    {% block navbar %}
-    <nav class="navbar navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <span class="navbar-brand">Alke Wallet</span>
+    <nav id="sidebar">
+        <div class="sidebar-brand">
+            <img src="{% static 'recursos/Logo-Alke-Wallet.svg' %}" alt="Logo">
+            <span>Alke Wallet</span>
+        </div>
+
+        <div class="sidebar-nav">
+            <a href="{% url 'menu' %}" class="nav-link {% block nav_inicio %}{% endblock %}">
+                <i class="bi bi-house-door"></i> Inicio
+            </a>
+            <a href="{% url 'deposit' %}" class="nav-link {% block nav_deposit %}{% endblock %}">
+                <i class="bi bi-plus-circle"></i> Depositar
+            </a>
+            <a href="{% url 'send_money' %}" class="nav-link {% block nav_send %}{% endblock %}">
+                <i class="bi bi-send"></i> Enviar Dinero
+            </a>
+            <a href="{% url 'transactions' %}" class="nav-link {% block nav_transactions %}{% endblock %}">
+                <i class="bi bi-list-ul"></i> Movimientos
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'login' %}">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </a>
         </div>
     </nav>
-    {% endblock %}
 
-    <div class="container">
-        {% block content %}
-        {% endblock %}
+    <div id="content-area">
+
+        <div id="top-header">
+            <div class="header-left">
+                <button id="btn-menu-toggle" aria-label="Menú">
+                    <i class="bi bi-list"></i>
+                </button>
+                <span class="page-title">{% block header_title %}{% endblock %}</span>
+            </div>
+            <span class="last-access">Último acceso: 16 Ene 2026</span>
+        </div>
+
+        <div id="main-content">
+            {% block content %}{% endblock %}
+        </div>
+
     </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    {% block extra_js %}{% endblock %}
+<div id="sidebar-overlay"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const wrapper   = document.getElementById('app-wrapper');
+    const overlay   = document.getElementById('sidebar-overlay');
+    const btnToggle = document.getElementById('btn-menu-toggle');
+
+    btnToggle.addEventListener('click', () => wrapper.classList.toggle('sidebar-open'));
+    overlay.addEventListener('click',   () => wrapper.classList.remove('sidebar-open'));
+</script>
+{% block extra_js %}{% endblock %}
 </body>
-
 </html>

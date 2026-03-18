@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'web_base',
+    'web_base.apps.WebBaseConfig',
 ]
 
 MIDDLEWARE = [
@@ -115,6 +115,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-import os
+# URL para acceder a los archivos en el navegador
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'web_base/static')] # O simplemente 'static' dependiendo de tu estructura
+
+# Ruta física donde Django buscará la carpeta 'static'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]

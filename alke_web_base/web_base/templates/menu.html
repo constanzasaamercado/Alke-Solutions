@@ -1,15 +1,37 @@
-{% extends 'base.html' %} {% load static %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Mi Menú - Alke Wallet{% endblock %}
+{% block title %}Inicio - Alke Wallet{% endblock %}
+{% block header_title %}Inicio{% endblock %}
+{% block nav_inicio %}active{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/menu.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="card p-5 shadow-lg">
-    <h4>Cuenta vista</h4>
-    <p>Saldo disponible: <strong>$ {{ saldo_actual }}</strong></p>
-    <a href="{% url 'deposit' %}" class="btn btn-primary">Depositar</a>
+<div class="d-flex align-items-center justify-content-center" style="min-height: 100%;">
+    <div class="account-card">
+
+        <div class="d-flex align-items-center mb-4">
+            <i class="bi bi-credit-card text-primary me-3" style="font-size: 2rem;"></i>
+            <div>
+                <h4 class="mb-0 fw-bold" style="color: #1a1a2e;">Cuenta vista</h4>
+                <small class="text-muted">N° {{ numero_cuenta }}</small>
+            </div>
+        </div>
+
+        <p class="text-muted mb-1" style="font-size: 0.95rem;">Saldo disponible:</p>
+        <div class="saldo-valor"
+             id="saldo-display"
+             data-valor="{{ saldo_actual }}">
+        </div>
+
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'javascript/utils.js' %}"></script>
+<script src="{% static 'javascript/menu.js' %}"></script>
 {% endblock %}

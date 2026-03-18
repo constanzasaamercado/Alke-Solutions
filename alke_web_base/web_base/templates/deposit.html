@@ -2,40 +2,44 @@
 {% load static %}
 
 {% block title %}Depositar - Alke Wallet{% endblock %}
+{% block header_title %}Depositar{% endblock %}
+{% block nav_deposit %}active{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/deposit.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex mb-4">
-        <a href="{% url 'menu' %}" class="btn btn-outline-secondary me-3">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <h2>Depositar Dinero</h2>
-    </div>
+<div class="d-flex align-items-start justify-content-center" style="min-height: 100%;">
+    <div class="page-card">
 
-    <div class="card card-body mb-4 shadow-sm border-0">
-        <label class="text-muted small fw-bold">Saldo disponible</label>
-        <div class="saldo-actual">
-            <h3 class="display-6 fw-bold text-primary mb-0">$ {{ saldo_actual }}</h3>
+        <h4 class="fw-bold mb-4" style="color: #1a1a2e;">Depositar Dinero</h4>
+
+        <div class="saldo-badge">
+            <div class="label">Saldo disponible</div>
+            <div class="valor">$ {{ saldo_actual }}</div>
         </div>
-    </div>
 
-    <div class="card card-body mb-4 shadow-sm border-0">
         <form method="POST" action="{% url 'deposit' %}">
             {% csrf_token %}
             <div class="mb-3">
-                <label for="depositAmount" class="form-label fw-bold">Monto a depositar:</label>
+                <label for="depositAmount" class="form-label fw-semibold">Monto a depositar</label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" class="form-control form-control-lg" name="monto" id="depositAmount" placeholder="0" required>
+                    <input type="number" class="form-control form-control-lg"
+                           name="monto" id="depositAmount"
+                           placeholder="0" min="1" required>
                 </div>
             </div>
-
-            <button type="submit" class="btn btn-primary btn-lg w-100">Confirmar Depósito</button>
+            <button type="submit" class="btn btn-primary w-100 py-2 mt-2 fw-semibold">
+                Confirmar Depósito
+            </button>
         </form>
+
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'javascript/deposit.js' %}"></script>
 {% endblock %}

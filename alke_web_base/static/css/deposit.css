@@ -1,0 +1,27 @@
+/* ================================================
+   deposit.css — Página de depósito
+   ================================================ */
+
+.saldo-badge {
+    background: #e8f0fe;
+    border-radius: 10px;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.saldo-badge .label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.saldo-badge .valor {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+/* Mobile */
+@media (max-width: 575.98px) {
+    .saldo-badge .valor { font-size: 1.3rem; }
+}

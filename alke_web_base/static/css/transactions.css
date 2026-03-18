@@ -1,0 +1,47 @@
+/* ================================================
+   transactions.css — Página de movimientos
+   ================================================ */
+
+.transactions-card {
+    max-width: 700px;
+}
+
+.table th {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+}
+
+.table td {
+    font-size: 0.9rem;
+    color: #1a1a2e;
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:hover td      { background: #f8f9ff; }
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+/* Mobile */
+@media (max-width: 575.98px) {
+    .table th,
+    .table td    { padding: 0.6rem 0.5rem; font-size: 0.8rem; }
+    .col-detalle { display: none; }
+}
