@@ -10,9 +10,25 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        if username == 'admin@alkewallet.com' and password == '1234':
+        if username == 'correo@correo.com' and password == '12345':
             request.session['saldo'] = 60000
             request.session['movimientos'] = []
+            request.session['contactos'] = [
+                {
+                    'nombre': 'María González',
+                    'cbu': '0000003100012345678901',
+                    'alias': 'maria.gonzalez',
+                    'banco': 'Banco Nación',
+                    'correo': 'maria@correo.com'
+                },
+                {
+                    'nombre': 'Juan Pérez',
+                    'cbu': '0000003100098765432101',
+                    'alias': 'juan.perez',
+                    'banco': 'Banco Santander',
+                    'correo': 'juan@correo.com'
+                },
+            ]
             return redirect('menu')
         else:
             error = 'Correo o contraseña incorrectos.'
@@ -37,10 +53,8 @@ def deposit_view(request):
     if request.method == 'POST':
         monto = int(request.POST.get('monto', 0))
         if monto > 0:
-            # Actualizar saldo
             request.session['saldo'] = saldo + monto
 
-            # Registrar movimiento
             movimientos = request.session.get('movimientos', [])
             movimientos.insert(0, {
                 'fecha': datetime.now().strftime('%d/%m/%Y %H:%M'),
@@ -56,31 +70,64 @@ def deposit_view(request):
     return render(request, 'deposit.html', context)
 
 
+# ── Agregar contacto ──
+def add_contact_view(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        cbu    = request.POST.get('cbu', '').strip()
+        alias  = request.POST.get('alias', '').strip()
+        banco  = request.POST.get('banco', '').strip()
+        correo = request.POST.get('correo', '').strip()
+
+        if nombre:
+            contactos = request.session.get('contactos', [])
+            contactos.append({
+                'nombre': nombre,
+                'cbu':    cbu,
+                'alias':  alias,
+                'banco':  banco,
+                'correo': correo
+            })
+            request.session['contactos'] = contactos
+
+    return redirect('send_money')
+
+
 # ── Enviar Dinero ──
 def send_money_view(request):
-    saldo = request.session.get('saldo', 60000)
+    saldo     = request.session.get('saldo', 60000)
+    contactos = request.session.get('contactos', [])
+    error     = None
 
     if request.method == 'POST':
-        monto = int(request.POST.get('monto', 0))
-        contacto = request.POST.get('contacto', 'Contacto')
+        monto    = int(request.POST.get('monto', 0))
+        contacto = request.POST.get('contacto', '').strip()
 
-        if monto > 0 and monto <= saldo:
-            # Actualizar saldo
+        if not contacto:
+            error = 'Debes seleccionar un contacto.'
+        elif monto <= 0:
+            error = 'El monto debe ser mayor a 0.'
+        elif monto > saldo:
+            error = 'Saldo insuficiente.'
+        else:
             request.session['saldo'] = saldo - monto
 
-            # Registrar movimiento
             movimientos = request.session.get('movimientos', [])
             movimientos.insert(0, {
-                'fecha': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                'tipo': 'Envío',
+                'fecha':   datetime.now().strftime('%d/%m/%Y %H:%M'),
+                'tipo':    'Envío',
                 'detalle': f'Enviado a {contacto}',
-                'monto': f'-${monto:,}'.replace(',', '.')
+                'monto':   f'-${monto:,}'.replace(',', '.')
             })
             request.session['movimientos'] = movimientos
+            return redirect('menu')
 
-        return redirect('menu')
-
-    return render(request, 'sendmoney.html')
+    context = {
+        'saldo_actual': saldo,
+        'contactos':    contactos,
+        'error':        error
+    }
+    return render(request, 'sendmoney.html', context)
 
 
 # ── Transacciones ──

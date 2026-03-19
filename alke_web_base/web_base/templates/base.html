@@ -16,7 +16,7 @@
 
     <nav id="sidebar">
         <div class="sidebar-brand">
-            <img src="{% static 'recursos/Logo-Alke-Wallet.svg' %}" alt="Logo">
+            <img src="{% static 'recursos/Logo-Alke-Wallet.svg' %}" alt="Logo" width="26" height="26">
             <span>Alke Wallet</span>
         </div>
 
@@ -49,6 +49,13 @@
                 <button id="btn-menu-toggle" aria-label="Menú">
                     <i class="bi bi-list"></i>
                 </button>
+
+                <!-- Logo visible solo en mobile -->
+                <a href="{% url 'menu' %}" id="mobile-brand">
+                    <img src="{% static 'recursos/Logo-Alke-Wallet.svg' %}" alt="Logo" width="26" height="26">
+                    <span>Alke Wallet</span>
+                </a>
+
                 <span class="page-title">{% block header_title %}{% endblock %}</span>
             </div>
             <span class="last-access">Último acceso: 16 Ene 2026</span>

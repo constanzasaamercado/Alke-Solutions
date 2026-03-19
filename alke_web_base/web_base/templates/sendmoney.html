@@ -5,6 +5,68 @@
 {% block header_title %}Enviar Dinero{% endblock %}
 {% block nav_send %}active{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Búsqueda de contactos */
+    #busqueda-contacto {
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    #lista-contactos {
+        max-height: 220px;
+        overflow-y: auto;
+        border: 1.5px solid #dee2e6;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        background: #fff;
+    }
+
+    .contacto-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f2f5;
+        transition: background 0.15s;
+    }
+
+    .contacto-item:last-child { border-bottom: none; }
+
+    .contacto-item:hover,
+    .contacto-item.selected {
+        background: #e8f0fe;
+    }
+
+    .contacto-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .contacto-info .nombre { font-weight: 600; font-size: 0.9rem; color: #1a1a2e; }
+    .contacto-info .detalle { font-size: 0.78rem; color: #6c757d; }
+
+    .contacto-item.selected .contacto-avatar { background: #0b5ed7; }
+
+    #sin-resultados {
+        padding: 1rem;
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.88rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex align-items-start justify-content-center" style="min-height: 100%;">
     <div class="page-card">
@@ -17,25 +79,69 @@
             </button>
         </div>
 
+        {% if error %}
+        <div class="alert alert-danger py-2 mb-3">{{ error }}</div>
+        {% endif %}
+
         <form method="POST" action="{% url 'send_money' %}">
             {% csrf_token %}
 
+            <!-- Campo oculto que guarda el contacto seleccionado -->
+            <input type="hidden" name="contacto" id="contacto-seleccionado" value="">
+
             <div class="mb-3">
-                <label class="form-label fw-semibold">Contacto</label>
-                <select id="lista-contactos-select" name="contacto"
-                        class="form-select form-select-lg" required>
-                    <option value="">Seleccione un contacto...</option>
-                </select>
+                <label class="form-label fw-semibold">Buscar Contacto</label>
+
+                <!-- Input de búsqueda -->
+                <input type="text" id="busqueda-contacto"
+                       class="form-control form-control-lg"
+                       placeholder="Buscar por nombre, alias o correo..."
+                       autocomplete="off">
+
+                <!-- Lista de contactos filtrada -->
+                <div id="lista-contactos">
+                    {% for c in contactos %}
+                    <div class="contacto-item"
+                         data-nombre="{{ c.nombre }}"
+                         data-alias="{{ c.alias }}"
+                         data-correo="{{ c.correo }}"
+                         data-banco="{{ c.banco }}">
+                        <div class="contacto-avatar">
+                            {{ c.nombre|slice:":1" }}
+                        </div>
+                        <div class="contacto-info">
+                            <div class="nombre">{{ c.nombre }}</div>
+                            <div class="detalle">
+                                {% if c.alias %}{{ c.alias }}{% endif %}
+                                {% if c.banco %} · {{ c.banco }}{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div id="sin-resultados">No hay contactos guardados.</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Contacto seleccionado -->
+                <div id="contacto-elegido" class="mt-2 d-none">
+                    <small class="text-success fw-semibold">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Contacto: <span id="nombre-elegido"></span>
+                    </small>
+                </div>
             </div>
 
             <div class="mb-4">
                 <label class="form-label fw-semibold">Monto a enviar</label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" name="monto" id="monto-enviar"
+                    <input type="number" name="monto"
                            class="form-control form-control-lg"
                            placeholder="0" min="1" required>
                 </div>
+                <small class="text-muted mt-1 d-block">
+                    Saldo disponible: ${{ saldo_actual }}
+                </small>
             </div>
 
             <div class="d-flex gap-2">
@@ -59,44 +165,100 @@
                 <h5 class="modal-title fw-bold">Agregar Contacto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Nombre y Apellido</label>
-                    <input type="text" id="nombre-contacto" class="form-control"
-                           placeholder="Ej: Juan Pérez">
+            <form method="POST" action="{% url 'add_contact' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre y Apellido</label>
+                        <input type="text" name="nombre" class="form-control"
+                               placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Número de CBU</label>
+                        <input type="text" name="cbu" class="form-control"
+                               placeholder="Ej: 1234567890123456789012" maxlength="22">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Alias</label>
+                        <input type="text" name="alias" class="form-control"
+                               placeholder="Ej: juan.perez" maxlength="22">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Nombre del Banco</label>
+                        <input type="text" name="banco" class="form-control"
+                               placeholder="Ej: Banco Patito" maxlength="50">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Correo electrónico</label>
+                        <input type="email" name="correo" class="form-control"
+                               placeholder="Ej: juan@correo.com">
+                    </div>
                 </div>
-                <div class="mb-2">
-                    <label class="form-label fw-semibold">Número de CBU</label>
-                    <input type="text" id="cbu-contacto" class="form-control"
-                           placeholder="Ej: 1234567890123456789012" maxlength="22">
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
-                <div class="mb-2">
-                    <label class="form-label fw-semibold">Alias</label>
-                    <input type="text" id="alias-contacto" class="form-control"
-                           placeholder="Ej: JuanPérez" maxlength="22">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label fw-semibold">Nombre del Banco</label>
-                    <input type="text" id="banco-contacto" class="form-control"
-                           placeholder="Ej: Banco Patito" maxlength="50">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label fw-semibold">Correo electrónico</label>
-                    <input type="email" id="correo-contacto" class="form-control"
-                           placeholder="Ej: juan@correo.com">
-                </div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary"
-                        data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary"
-                        id="btn-guardar-contacto">Guardar</button>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'javascript/sendmoney.js' %}"></script>
+<script>
+    const busqueda       = document.getElementById('busqueda-contacto');
+    const items          = document.querySelectorAll('.contacto-item');
+    const inputOculto    = document.getElementById('contacto-seleccionado');
+    const contactoElegido = document.getElementById('contacto-elegido');
+    const nombreElegido  = document.getElementById('nombre-elegido');
+
+    // ── Filtrar contactos al escribir ──
+    busqueda.addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        let hayResultados = false;
+
+        items.forEach(item => {
+            const nombre = item.dataset.nombre.toLowerCase();
+            const alias  = item.dataset.alias.toLowerCase();
+            const correo = item.dataset.correo.toLowerCase();
+
+            if (nombre.includes(q) || alias.includes(q) || correo.includes(q)) {
+                item.style.display = 'flex';
+                hayResultados = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Mostrar mensaje si no hay resultados
+        let sinRes = document.getElementById('sin-resultados');
+        if (!sinRes) {
+            sinRes = document.createElement('div');
+            sinRes.id = 'sin-resultados';
+            sinRes.style.cssText = 'padding:1rem;text-align:center;color:#6c757d;font-size:0.88rem';
+            document.getElementById('lista-contactos').appendChild(sinRes);
+        }
+        sinRes.textContent = hayResultados ? '' : 'No se encontraron contactos.';
+    });
+
+    // ── Seleccionar contacto al hacer click ──
+    items.forEach(item => {
+        item.addEventListener('click', function () {
+            // Deseleccionar todos
+            items.forEach(i => i.classList.remove('selected'));
+
+            // Seleccionar este
+            this.classList.add('selected');
+
+            const nombre = this.dataset.nombre;
+            inputOculto.value = nombre;
+            busqueda.value = nombre;
+
+            // Mostrar confirmación
+            nombreElegido.textContent = nombre;
+            contactoElegido.classList.remove('d-none');
+        });
+    });
+</script>
 {% endblock %}
